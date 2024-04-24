@@ -1,0 +1,63 @@
+#include <iostream>
+#include <vector>
+#include <ctime>
+#include <algorithm>
+#include <cstdlib>
+#include <chrono>
+#include <fstream>
+
+using namespace std;
+
+// Quick sort implementation
+void quickSort(vector<int>& arr, int low, int high) {
+    if (low < high) {
+        int pivot = arr[high];
+        int i = low - 1;
+
+        for (int j = low; j < high; j++) {
+            if (arr[j] <= pivot) {
+                i++;
+                swap(arr[i], arr[j]);
+            }
+        }
+        swap(arr[i + 1], arr[high]);
+        int pivotIndex = i + 1;
+
+        quickSort(arr, low, pivotIndex - 1);
+        quickSort(arr, pivotIndex + 1, high);
+    }
+}
+
+int main() {
+    ofstream outputFile("quick_sort_times.txt");
+
+    if (!outputFile) {
+        cerr << "Error opening file." << endl;
+        return 1;
+    }
+
+    // Vary the number of elements in the list
+    for (int n = 1000; n <= 10000; n += 1000) {
+        vector<int> numbers(n);
+
+        // Generate random numbers
+        for (int i = 0; i < n; i++) {
+            numbers[i] = rand() % 1000;
+        }
+
+        // Measure the time taken for sorting
+        auto start = chrono::high_resolution_clock::now();
+        quickSort(numbers, 0, numbers.size() - 1);
+        auto end = chrono::high_resolution_clock::now();
+        chrono::duration<double> elapsed_seconds = end - start;
+
+        cout << "Time taken to sort " << n << " elements: " << elapsed_seconds.count() << " seconds" << endl;
+
+        // Write results to file
+        outputFile << n << "\t" << elapsed_seconds.count() << endl;
+    }
+
+    outputFile.close();
+
+    return 0;
+}

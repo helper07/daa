@@ -1,0 +1,66 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cmath>
+
+using namespace std;
+
+struct Point {
+    int x, y;
+};
+
+double distance(Point a, Point b) {
+    return sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
+}
+
+vector<int> nearestNeighbor(vector<Point>& points, int start) {
+    int n = points.size();
+    vector<int> path;
+    vector<bool> visited(n, false);
+
+    path.push_back(start);
+    visited[start] = true;
+
+    for (int i = 0; i < n - 1; ++i) {
+        int last = path.back();
+        int nearest = -1;
+        double minDist = numeric_limits<double>::max();
+
+        for (int j = 0; j < n; ++j) {
+            if (!visited[j]) {
+                double dist = distance(points[last], points[j]);
+                if (dist < minDist) {
+                    minDist = dist;
+                    nearest = j;
+                }
+            }
+        }
+
+        path.push_back(nearest);
+        visited[nearest] = true;
+    }
+
+    return path;
+}
+
+int main() {
+    vector<Point> points = {{0, 0}, {1, 2}, {3, 1}, {4, 3}, {2, 4}};
+    int start = 0; // Starting point index
+
+    vector<int> path = nearestNeighbor(points, start);
+
+    cout << "Path: ";
+    for (int i = 0; i < path.size(); ++i) {
+        cout << path[i] << " ";
+    }
+    cout << endl;
+
+    double totalDistance = 0.0;
+    for (int i = 0; i < path.size() - 1; ++i) {
+        totalDistance += distance(points[path[i]], points[path[i + 1]]);
+    }
+
+    cout << "Total distance: " << totalDistance << endl;
+
+    return 0;
+}

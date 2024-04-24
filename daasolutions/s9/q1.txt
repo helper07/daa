@@ -1,0 +1,45 @@
+#include <iostream>
+#include <vector>
+#include <limits>
+
+using namespace std;
+
+float optimalBST(vector<float>& keys, vector<float>& freq) {
+    int n = keys.size();
+    vector<vector<float>> dp(n + 1, vector<float>(n + 1, 0));
+
+    // Base case: single keys
+    for (int i = 0; i < n; ++i) {
+        dp[i][i] = freq[i];
+    }
+
+    // Build the table bottom-up
+    for (int len = 2; len <= n; ++len) {
+        for (int i = 0; i <= n - len + 1; ++i) {
+            int j = i + len - 1;
+            dp[i][j] = numeric_limits<float>::max();
+            float sum = 0;
+            for (int k = i; k <= j; ++k) {
+                sum += freq[k];
+            }
+            for (int k = i; k <= j; ++k) {
+                float cost = ((k > i) ? dp[i][k - 1] : 0) + ((k < j) ? dp[k + 1][j] : 0) + sum;
+                if (cost < dp[i][j]) {
+                    dp[i][j] = cost;
+                }
+            }
+        }
+    }
+
+    return dp[0][n - 1];
+}
+
+int main() {
+    vector<float> keys = {10, 12, 20};
+    vector<float> freq = {34, 8, 50}; // Frequency of each key
+
+    float minCost = optimalBST(keys, freq);
+    cout << "Minimum cost of optimal binary search tree: " << minCost << endl;
+
+    return 0;
+}

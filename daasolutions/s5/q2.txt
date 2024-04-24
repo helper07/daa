@@ -1,0 +1,88 @@
+#include <iostream>
+#include <queue>
+#include <vector>
+#include <unordered_map>
+
+using namespace std;
+
+struct TreeNode {
+    char data;
+    int frequency;
+    TreeNode* left;
+    TreeNode* right;
+
+    TreeNode(char data, int frequency) : data(data), frequency(frequency), left(nullptr), right(nullptr) {}
+};
+
+struct CompareNodes {
+    bool operator()(TreeNode* a, TreeNode* b) const {
+        return a->frequency > b->frequency;
+    }
+};
+
+class HuffmanCoding {
+public:
+    TreeNode* buildHuffmanTree(const unordered_map<char, int>& frequencies) {
+        priority_queue<TreeNode*, vector<TreeNode*>, CompareNodes> pq;
+
+        // Create a leaf node for each character and add it to the priority queue
+        for (auto& pair : frequencies) {
+            pq.push(new TreeNode(pair.first, pair.second));
+        }
+
+        // Merge nodes until there is only one node left in the priority queue
+        while (pq.size() > 1) {
+            TreeNode* left = pq.top(); pq.pop();
+            TreeNode* right = pq.top(); pq.pop();
+            TreeNode* merged = new TreeNode('$', left->frequency + right->frequency);
+            merged->left = left;
+            merged->right = right;
+            pq.push(merged);
+        }
+
+        // Return the root of the Huffman tree
+        return pq.top();
+    }
+
+    void generateHuffmanCodes(TreeNode* root, string code, unordered_map<char, string>& huffmanCodes) {
+        if (!root)
+            return;
+        if (root->data != '$')
+            huffmanCodes[root->data] = code;
+        generateHuffmanCodes(root->left, code + "0", huffmanCodes);
+        generateHuffmanCodes(root->right, code + "1", huffmanCodes);
+    }
+};
+
+int main() {
+    string text;
+    cout << "Enter a string to encode using Huffman coding: ";
+    getline(cin, text);
+
+    // Calculate frequencies of characters
+    unordered_map<char, int> frequencies;
+    for (char ch : text) {
+        frequencies[ch]++;
+    }
+
+    // Build Huffman tree
+    HuffmanCoding huffman;
+    TreeNode* root = huffman.buildHuffmanTree(frequencies);
+
+    // Generate Huffman codes for characters
+    unordered_map<char, string> huffmanCodes;
+    huffman.generateHuffmanCodes(root, "", huffmanCodes);
+
+    // Output Huffman codes
+    cout << "Huffman Codes:" << endl;
+    for (auto& pair : huffmanCodes) {
+        cout << pair.first << ": " << pair.second << endl;
+    }
+
+    // Calculate best-case and worst-case complexities
+    // Best case: O(n log n) where n is the number of unique characters (each character has equal frequency)
+    // Worst case: O(n log n) where n is the number of characters in the input string (each character has unique frequency)
+    // Since building the Huffman tree dominates the time complexity.
+
+    return 0;
+}

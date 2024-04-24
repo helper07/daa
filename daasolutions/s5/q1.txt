@@ -1,0 +1,82 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+struct Edge {
+    int source, destination, weight;
+};
+
+class Graph {
+    int V;
+    vector<Edge> edges;
+
+public:
+    Graph(int V) : V(V) {}
+
+    void addEdge(int source, int destination, int weight) {
+        edges.push_back({source, destination, weight});
+    }
+
+    int findParent(vector<int>& parent, int i) {
+        if (parent[i] == -1)
+            return i;
+        return findParent(parent, parent[i]);
+    }
+
+    void unionSets(vector<int>& parent, int x, int y) {
+        int xset = findParent(parent, x);
+        int yset = findParent(parent, y);
+        parent[xset] = yset;
+    }
+
+    void kruskalMST() {
+        sort(edges.begin(), edges.end(), [](const Edge& a, const Edge& b) {
+            return a.weight < b.weight;
+        });
+
+        vector<int> parent(V, -1);
+        vector<pair<int, int>> result;
+
+        int edgeCount = 0;
+        int i = 0;
+
+        while (edgeCount < V - 1 && i < edges.size()) {
+            Edge nextEdge = edges[i++];
+            int x = findParent(parent, nextEdge.source);
+            int y = findParent(parent, nextEdge.destination);
+
+            if (x != y) {
+                result.push_back({nextEdge.source, nextEdge.destination});
+                unionSets(parent, x, y);
+                edgeCount++;
+            }
+        }
+
+        cout << "Edges in the minimum spanning tree:" << endl;
+        for (auto& edge : result) {
+            cout << edge.first << " - " << edge.second << endl;
+        }
+    }
+};
+
+int main() {
+    int V, E;
+    cout << "Enter the number of vertices and edges: ";
+    cin >> V >> E;
+
+    Graph graph(V);
+
+    cout << "Enter the source, destination, and weight of each edge:" << endl;
+    for (int i = 0; i < E; ++i) {
+        int source, destination, weight;
+        cin >> source >> destination >> weight;
+        graph.addEdge(source, destination, weight);
+    }
+
+    cout << "Minimum Spanning Tree using Kruskal's algorithm:" << endl;
+    graph.kruskalMST();
+
+    return 0;
+}

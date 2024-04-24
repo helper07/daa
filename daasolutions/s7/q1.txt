@@ -1,0 +1,87 @@
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <limits>
+
+using namespace std;
+
+#define INF numeric_limits<int>::max()
+
+class Graph {
+    int V;
+    vector<vector<pair<int, int>>> adjList;
+
+public:
+    Graph(int vertices) : V(vertices) {
+        adjList.resize(V);
+    }
+
+    void addEdge(int source, int destination, int weight) {
+        adjList[source].push_back({destination, weight});
+    }
+
+    void dijkstraShortestPath(int source) {
+        vector<int> distance(V, INF);
+        vector<bool> visited(V, false);
+
+        distance[source] = 0;
+
+        priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
+        pq.push({0, source});
+
+        while (!pq.empty()) {
+            int u = pq.top().second;
+            pq.pop();
+
+            if (visited[u])
+                continue;
+
+            visited[u] = true;
+
+            for (auto& neighbor : adjList[u]) {
+                int v = neighbor.first;
+                int weight = neighbor.second;
+
+                if (distance[u] + weight < distance[v]) {
+                    distance[v] = distance[u] + weight;
+                    pq.push({distance[v], v});
+                }
+            }
+        }
+
+        // Print shortest distances from source to all other vertices
+        cout << "Shortest distances from vertex " << source << ":" << endl;
+        for (int i = 0; i < V; ++i) {
+            if (i != source) {
+                cout << "Vertex " << i << ": ";
+                if (distance[i] == INF)
+                    cout << "INF" << endl;
+                else
+                    cout << distance[i] << endl;
+            }
+        }
+    }
+};
+
+int main() {
+    int V, E;
+    cout << "Enter the number of vertices and edges: ";
+    cin >> V >> E;
+
+    Graph graph(V);
+
+    cout << "Enter the source, destination, and weight of each edge:" << endl;
+    for (int i = 0; i < E; ++i) {
+        int source, destination, weight;
+        cin >> source >> destination >> weight;
+        graph.addEdge(source, destination, weight);
+    }
+
+    int source;
+    cout << "Enter the source vertex: ";
+    cin >> source;
+
+    graph.dijkstraShortestPath(source);
+
+    return 0;
+}
